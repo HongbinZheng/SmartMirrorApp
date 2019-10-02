@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "241196821087",
+    "firebase_url": "https://smartmirrorandroid-6a801.firebaseio.com",
+    "project_id": "smartmirrorandroid-6a801",
+    "storage_bucket": "smartmirrorandroid-6a801.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241196821087:android:b0a616f4a75051dc5789ea",
+        "android_client_info": {
+          "package_name": "smart.mirror.googlesignin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "241196821087-d0c429vsgoh2s157k663njshckgedjjl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "smart.mirror.googlesignin",
+            "certificate_hash": "35af713b242b72f4d301668424750f15c27400e8"
+          }
+        },
+        {
+          "client_id": "241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxeo2JEf1L4jJIUMEcj-EaOBiL9rax_jg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "smart.mirror.googlesignin"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
