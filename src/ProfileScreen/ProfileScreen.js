@@ -98,9 +98,11 @@
 
 
 import React from 'react';
-import { Text, View,StyleSheet, Button } from 'react-native';
+import { Text, View,StyleSheet, Button,Image } from 'react-native';
 import * as GoogleSignIn from 'expo-google-sign-in';
-import * as Expo from 'expo';
+import SocketIOClient from 'socket.io-client';
+
+const socket = SocketIOClient('http://ec2-18-212-195-64.compute-1.amazonaws.com', { transports: [ 'websocket'] });
 
 export default class AuthScreen extends React.Component {
   constructor(props) {
@@ -121,13 +123,13 @@ export default class AuthScreen extends React.Component {
   initAsync = async () => {
     await GoogleSignIn.initAsync({
       clientId: '241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com',
+      scopes: [GoogleSignIn.SCOPES.PROFILE, GoogleSignIn.SCOPES.EMAIL, 'https://mail.google.com/','https://www.googleapis.com/auth/calendar',"https://www.googleapis.com/auth/calendar.settings.readonly","https://www.googleapis.com/auth/gmail.labels" ]
     });
     this._syncUserWithStateAsync();
   };
 
   _syncUserWithStateAsync = async () => {
     const user = await GoogleSignIn.signInSilentlyAsync();
-    alert( JSON.stringify(user) + user.firstName + user.lastName);
     if(user){
       this.setState({signedIn:true, firstName:user.firstName, lastName:user.lastName,photoURL:user.photoURL,user:user});
     }
@@ -135,7 +137,7 @@ export default class AuthScreen extends React.Component {
 
   signOutAsync = async () => {
     await GoogleSignIn.signOutAsync();
-    this.setState({ user: null });
+    this.setState({ user: null,signedIn:false });
   };
 
   signInAsync = async () => {
@@ -143,10 +145,6 @@ export default class AuthScreen extends React.Component {
       await GoogleSignIn.askForPlayServicesAsync();
       const { type, user } = await GoogleSignIn.signInAsync();
       if (type === 'success') {
-        //alert('success sign in');
-        ///alert(JSON.stringify(user));
-        
-        //console.warn(user);
         this._syncUserWithStateAsync();
       }
     } catch ({ message }) {
@@ -165,9 +163,9 @@ export default class AuthScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        {this.state.signedIn ? (
-          <LoggedInPage firstName={this.state.firstName} lastName= {this.state.lastName} photoURL={this.state.photoURL} />
-        ) : (
+        {this.state.signedIn ? 
+          (<LoggedInPage firstName={this.state.firstName} lastName= {this.state.lastName} photoURL={this.state.photoURL} signIn={this.signIn}/>)
+         : (
           <LoginPage signIn={this.signIn} />
         )}
       </View>
@@ -189,6 +187,7 @@ const LoggedInPage = props => {
     <View style={styles.container}>
       <Text style={styles.header}>Welcome: {props.firstName}, {props.lastName} </Text>
       <Image style={styles.image} source={{ uri: props.photoURL }} />
+      <Button title="Sign out"  onPress={() => props.signIn()} />
     </View>
   )
 }
@@ -215,127 +214,3 @@ const styles = StyleSheet.create({
     borderRadius: 150
   }
 })
-// const styles = StyleSheet.create({ container: {  
-//   flex: 1,
-//   padding:60,
-//   alignContent:'center',
-//   textAlign:'center'
-// }}) 
-
-// import React from "react"
-// import { StyleSheet, Text, View, Image, Button } from "react-native"
-// import * as GoogleSignIn from 'expo-google-sign-in';
-// import * as Expo from "expo"
-// import * as Google from "expo-google-app-auth";
-
-// export default class ProfileScreen extends React.Component {
-//   constructor(props) {
-//     super(props)
-//     this.state = {
-//       signedIn: false,
-//       name: "",
-//       photoUrl: "",
-//       user:null
-//     }
-//   }
-
-
-//     componentDidMount() {
-//     this.initAsync();
-//   }
-
-//   initAsync = async () => {
-//     await GoogleSignIn.initAsync({
-//       clientId: '241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com',
-//     });
-//     this._syncUserWithStateAsync();
-//   };
-
-//   _syncUserWithStateAsync = async () => {
-//     const user = await GoogleSignIn.signInSilentlyAsync();
-//     this.setState({ user });
-//   };
-
-//   signOutAsync = async () => {
-//     await GoogleSignIn.signOutAsync();
-//     this.setState({ user: null });
-//   };
-
-//   signInAsync = async () => {
-//     try {
-//       await GoogleSignIn.askForPlayServicesAsync();
-//       const { type, user } = await GoogleSignIn.signInAsync();
-//       if (type === 'success') {
-//         alert('success sign in');
-//         this.setState({
-//           signedIn: true,
-//           name: result.user.name,
-//           photoUrl: result.user.photoUrl
-//         });
-//         this._syncUserWithStateAsync();
-//       }else {
-//         console.log("cancelled")
-//       }
-//     } catch ({ message }) {
-//       alert('login: Error:' + message);
-//     }
-//   };
-
-//   onPress = () => {
-//     if (this.state.user) {
-//       this.signOutAsync();
-//     } else {
-//       this.signInAsync();
-//     }
-//   };
-
-//   render() {
-//     return (
-//       <View style={styles.container}>
-//         {this.state.signedIn ? (
-//           <LoggedInPage name={this.state.name} photoUrl={this.state.photoUrl} />
-//         ) : (
-//           <LoginPage signIn={this.signIn} />
-//         )}
-//       </View>
-//     )
-//   }
-// }
-
-// const LoginPage = props => {
-//   return (
-//     <View>
-//       <Text style={styles.header}>Sign In With Google</Text>
-//       <Button title="Sign in with Google"  onPress={() => props.signIn()} />
-//     </View>
-//   )
-// }
-
-// const LoggedInPage = props => {
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.header}>Welcome:{props.name}</Text>
-//       <Image style={styles.image} source={{ uri: props.photoUrl }} />
-//     </View>
-//   )
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//     alignItems: "center",
-//     justifyContent: "center"
-//   },
-//   header: {
-//     fontSize: 25
-//   },
-//   image: {
-//     marginTop: 15,
-//     width: 150,
-//     height: 150,
-//     borderColor: "rgba(0,0,0,0.2)",
-//     borderWidth: 3,
-//     borderRadius: 150
-//   }
-// })

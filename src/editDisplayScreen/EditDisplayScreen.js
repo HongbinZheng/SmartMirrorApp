@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert,Button } from 'react-native';
+
 import ToggleSwitch from 'toggle-switch-react-native'
 import { Header } from 'react-native-elements';
 import axios from 'axios';
+import * as GoogleSignIn from 'expo-google-sign-in';
 import SocketIOClient from 'socket.io-client';
+import DialogManager, { ScaleAnimation, DialogContent,DialogComponent  } from 'react-native-dialog-component';
+
+import AddDevice from './addDevice';
+import ChangeConfig from './changeConfig'
 
 const socket = SocketIOClient('http://ec2-18-212-195-64.compute-1.amazonaws.com', { transports: [ 'websocket'] });
 
@@ -15,134 +21,118 @@ class EditDisplayScreen extends Component {
             MapConfig: "OFF",
             NewsConfig: "OFF",
             DateConfig: "OFF",
-            DeviceID: "", //9c:b6:d0:e6:ef:53,
+            DeviceID: "9c:b6:d0:e6:ef:53",
+            Address:'',
+            user:'',
             existID:false
         };
-
     }
 
     componentDidMount() {
         if(this.state.DeviceID !== ""){
             this.handleDeviceID()
+            //this.initAsync();
         }
     }
 
-    
-    onPress = () => {
+    initAsync = async () => {
+        await GoogleSignIn.initAsync({
+            clientId: '241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com',
+            scopes: [GoogleSignIn.SCOPES.PROFILE, GoogleSignIn.SCOPES.EMAIL, 'https://mail.google.com/', 'https://www.googleapis.com/auth/calendar', "https://www.googleapis.com/auth/calendar.settings.readonly", "https://www.googleapis.com/auth/gmail.labels"]
+        });
+        this._syncUserWithStateAsync();
+    };
+
+    _syncUserWithStateAsync = async () => {
+        const user = await GoogleSignIn.signInSilentlyAsync();
+        if (user) {
+            this.setState({ signedIn: true, user: user });
+            socket.emit('apis:receive', { DeviceID: this.state.DeviceID, token: user.accessToken });
+            socket.on('apis:send', (data) => { console.warn(data) });
+        }
+    };
+
+    onPress() {
+
         const configData = this.state
         axios.post('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/changeConfig', { configData }).then(res => {
-            if(res.data.code === 400){
-                console.warn(res.data)
+            if (res.data.code === 400) {
+                alert("device not found")
             }
         }).catch(err => { console.warn(err) })
         socket.emit('config:receive', { config: this.state });
-        socket.on('config:send',(data)=>{console.warn(data)})
+        socket.on('config:send', (data) => { console.warn(data) })
     }
 
-    handleDeviceID(){
-        axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/configDisplay', { params: { DeviceID: this.state.DeviceID } }).then(res => {
-            this.setState(res.data);
-            this.setState({existID:true})
+    valueChange(value, name) {
+        this.setState({ [name]: value });
+    }
+
+    onDeviceIDChange(value) {
+        // parent class change handler is always called with field name and value
+        this.setState({ DeviceID: value });
+    }
+    onAddressChange(value) {
+        // parent class change handler is always called with field name and value
+        this.setState({ Address: value });
+    }
+
+    handleDeviceID() {
+        axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/phoneGetDisplay', { params: { DeviceID: this.state.DeviceID } }).then(res => {
+            if (res.data.code == 400) {
+                alert("device not found")
+            } else {
+                this.setState(res.data);
+                this.setState({ existID: true })
+                if(this.state.user !== null){
+                    this.addDeviceID();
+                }
+            }
         }).catch(err => { console.warn(err) })
+        //this.initAsync();
+    }
+
+    addDeviceID(){
+        axios.post('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/addDevice', { params: { DeviceID: this.state.DeviceID,user:this.state.user } }).then(res=>{
+            console.log(res);
+        })
     }
 
     render() {
-        if (!this.state.existID) {
+        if (this.state.user !== null) {
             return (
-                <View style={{ padding: 10, alignItems:'center',justifyContent:'center' }}>
-                    <TextInput
-                        style={{ height: 40 }}
-                        placeholder="Enter Your DeviceID"
-                        onChangeText={(DeviceID) => this.setState({ DeviceID })}
-                        value={this.state.DeviceID}
+                <View >
+                    <Button
+                    style={{ top: 40 }}
+                        title="Add"
+                        onPress={() => {
+                            this.dialogComponent.show();
+                        }}
                     />
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={() => this.handleDeviceID()}
+                    <DialogComponent
+                        ref={(dialogComponent) => { this.dialogComponent = dialogComponent; }}
                     >
-                        <Text> Submit </Text>
-                    </TouchableOpacity>
+                        <View>
+                        <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
+                        </View>
+                    </DialogComponent>
                 </View>
             )
         } else {
-            return (
-                <View>
+            if (!this.state.existID) {
+                return (
+                    <View style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>
+                        <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
+                    </View>
+                )
+            } else {
+                return (
                     <View>
-                        <Header
-                            backgroundColor='#67baf6'
-                            centerComponent={{ text: 'Edit Display Setting', style: { color: '#fff' } }}
-                        />
+                        <ChangeConfig config={this.state} onPress={this.onPress.bind(this)} valueChange={this.valueChange.bind(this)} addressChange={this.onAddressChange.bind(this)} />
                     </View>
-    
-                    <View >
-                        <Text>WeatherConfig</Text>
-                        <Picker
-                            selectedValue={this.state.WeatherConfig}
-                            style={{ height: 50, width: 300 }}
-                            onValueChange={(itemValue, itemIndex) =>
-                                this.setState({ WeatherConfig: itemValue })
-                            }
-                            
-                            >
-                            <Picker.Item label="OFF" value="OFF" />
-                            <Picker.Item label="top-left" value="top-left" />
-                            <Picker.Item label="top-middle" value="top-middle" />
-                            <Picker.Item label="top-right" value="top-right" />
-                        </Picker>
-                        <Text>MapConfig</Text>
-                        <Picker
-                            selectedValue={this.state.MapConfig}
-                            style={{ height: 50, width: 300 }}
-                            onValueChange={(itemValue, itemIndex) =>
-                                this.setState({ MapConfig: itemValue })
-                            }
-                            
-                            >
-                            <Picker.Item label="OFF" value="OFF" />
-                            <Picker.Item label="bottom-left" value="bottom-left" />
-                            <Picker.Item label="bottom-right" value="bottom-right" />
-                        </Picker>
-                        <Text>NewsConfig</Text>
-                        <Picker
-                            selectedValue={this.state.NewsConfig}
-                            style={{ height: 50, width: 300 }}
-                            onValueChange={(itemValue, itemIndex) =>
-                                this.setState({ NewsConfig: itemValue })
-                            }
-                            
-                            >
-                            <Picker.Item label="OFF" value="OFF" />
-                            <Picker.Item label="middle-left" value="middle-left" />
-                            <Picker.Item label="middle-right" value="middle-right" />
-                        </Picker>
-                        <Text>DateConfig</Text>
-                        <Picker
-                            selectedValue={this.state.DateConfig}
-                            style={{ height: 50, width: 300 }}
-                            onValueChange={(itemValue, itemIndex) =>
-                                this.setState({ DateConfig: itemValue })
-                            }
-                            
-                            >
-                            <Picker.Item label="OFF" value="OFF" />
-                            <Picker.Item label="top-left" value="top-left" />
-                            <Picker.Item label="top-middle" value="top-middle" />
-                            <Picker.Item label="top-right" value="top-right" />
-                        </Picker>
-                    </View>
-                    <View>
-                            <TouchableOpacity
-                                style={styles.button}
-                                onPress={()=>this.onPress()}
-                            >
-                            <Text> Submit </Text>
-                            </TouchableOpacity>
-                    </View>
-    
-                </View>
-            );
+                );
+            }
         }
-
     }
 }
 
