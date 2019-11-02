@@ -101,7 +101,6 @@ class EditDisplayScreen extends Component {
     }
 
     addDeviceID(){
-        console.log("here")
         params = {
             DeviceID:this.state.DeviceID,
             user:this.state.user.email
@@ -115,8 +114,9 @@ class EditDisplayScreen extends Component {
         if (this.state.user !== null) {
             return (
                 <View style={{top:50}}>
-                    {this.state.DeviceIDList.map(ID=>{return(
-                   <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID}})}><Text>{ID}</Text></TouchableOpacity></View>
+                    {this.state.DeviceIDList.map(ID=>{
+                        return(
+                   <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID},user:this.state.user})}><Text>{ID}</Text></TouchableOpacity></View>
                     )
      
                     })}
