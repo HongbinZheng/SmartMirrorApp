@@ -21,18 +21,19 @@ class EditDisplayScreen extends Component {
             MapConfig: "OFF",
             NewsConfig: "OFF",
             DateConfig: "OFF",
-            DeviceID: "9c:b6:d0:e6:ef:53",
+            DeviceID: "",//"9c:b6:d0:e6:ef:53",
+            DeviceIDList:[],
             Address:'',
-            user:'',
+            user:null,
             existID:false
         };
     }
 
     componentDidMount() {
-        if(this.state.DeviceID !== ""){
-            this.handleDeviceID()
-            //this.initAsync();
-        }
+        // if(this.state.DeviceID !== ""){
+        //     this.handleDeviceID()
+        // }
+        this.initAsync();
     }
 
     initAsync = async () => {
@@ -46,6 +47,11 @@ class EditDisplayScreen extends Component {
     _syncUserWithStateAsync = async () => {
         const user = await GoogleSignIn.signInSilentlyAsync();
         if (user) {
+            axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/getDeviceList',{params: { user: user.email }}).then(res=>{
+                if(res.data){
+                    this.setState({DeviceIDList:res.data.DeviceID})
+                }
+            })
             this.setState({ signedIn: true, user: user });
             socket.emit('apis:receive', { DeviceID: this.state.DeviceID, token: user.accessToken });
             socket.on('apis:send', (data) => { console.warn(data) });
@@ -53,7 +59,6 @@ class EditDisplayScreen extends Component {
     };
 
     onPress() {
-
         const configData = this.state
         axios.post('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/changeConfig', { configData }).then(res => {
             if (res.data.code === 400) {
@@ -82,26 +87,39 @@ class EditDisplayScreen extends Component {
             if (res.data.code == 400) {
                 alert("device not found")
             } else {
-                this.setState(res.data);
-                this.setState({ existID: true })
                 if(this.state.user !== null){
                     this.addDeviceID();
                 }
+                this.setState(res.data);
+                this.setState({ existID: true })
+                this.props.navigation.navigate('ChangeConfig',{
+                    config:this.state
+                })
             }
         }).catch(err => { console.warn(err) })
         //this.initAsync();
     }
 
     addDeviceID(){
-        axios.post('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/addDevice', { params: { DeviceID: this.state.DeviceID,user:this.state.user } }).then(res=>{
-            console.log(res);
-        })
+        console.log("here")
+        params = {
+            DeviceID:this.state.DeviceID,
+            user:this.state.user.email
+        }
+        axios.post('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/addDevice', { params }).then(res=>{
+            this.setState({DeviceIDList:res.data.value.Attributes.DeviceID})
+        }).catch(err=>console.log(err))
     }
 
     render() {
         if (this.state.user !== null) {
             return (
-                <View >
+                <View style={{top:50}}>
+                    {this.state.DeviceIDList.map(ID=>{return(
+                   <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID}})}><Text>{ID}</Text></TouchableOpacity></View>
+                    )
+     
+                    })}
                     <Button
                     style={{ top: 40 }}
                         title="Add"
@@ -125,10 +143,10 @@ class EditDisplayScreen extends Component {
                         <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
                     </View>
                 )
-            } else {
+             } else {
                 return (
                     <View>
-                        <ChangeConfig config={this.state} onPress={this.onPress.bind(this)} valueChange={this.valueChange.bind(this)} addressChange={this.onAddressChange.bind(this)} />
+                        {/* <ChangeConfig config={this.state} onPress={this.onPress.bind(this)} valueChange={this.valueChange.bind(this)} addressChange={this.onAddressChange.bind(this)} /> */}
                     </View>
                 );
             }

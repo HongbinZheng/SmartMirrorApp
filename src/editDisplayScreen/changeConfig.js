@@ -1,27 +1,46 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert } from 'react-native';
 import { Header } from 'react-native-elements';
+import axios from 'axios'
 
 export default class changeConfig extends Component {
-    constructor (props) {
+    constructor(props) {
         super(props);
         this.state = {
-            WeatherConfig: this.props.config.WeatherConfig,
-            MapConfig: this.props.config.MapConfig,
-            NewsConfig: this.props.config.NewsConfig,
-            DateConfig: this.props.config.DateConfig,
-            address:this.props.config.address
+            WeatherConfig: "",
+            MapConfig: "",
+            NewsConfig: "",
+            DateConfig: "",
+            Address: "",
+            DeviceID:""
         };
     }
 
-    onPressButton(){
-        this.props.onPress()
+    componentDidMount(){
+        this.setState(this.props.navigation.state.params.config)
+        this.handleDeviceID()
     }
-    valueChange(value,name){
-        this.props.valueChange(value,name)
+
+    handleDeviceID() {
+        axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/phoneGetDisplay', { params: { DeviceID: this.props.navigation.state.params.config.DeviceID } }).then(res => {
+            if (res.data.code == 400) {
+                alert("device not found")
+            } else {
+                this.setState(res.data);
+                this.setState({ existID: true })
+            }
+        }).catch(err => { console.warn(err) })
     }
-    onChangeText(text){
-        this.props.addressChange(text)
+
+    onPress() {
+        const configData = this.state
+        axios.post('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/changeConfig', { configData }).then(res => {
+            if (res.data.code === 400) {
+                alert("device not found")
+            }
+        }).catch(err => { console.warn(err) })
+        socket.emit('config:receive', { config: this.state });
+        socket.on('config:send', (data) => { console.warn(data) })
     }
 
     render() {
@@ -37,10 +56,10 @@ export default class changeConfig extends Component {
                 <View >
                     <Text>WeatherConfig</Text>
                     <Picker
-                        selectedValue={this.props.config.WeatherConfig}
+                        selectedValue={this.state.WeatherConfig}
                         style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
-                            this.valueChange(itemValue,'WeatherConfig')
+                            this.setState({WeatherConfig:itemValue})
                         }
 
                     >
@@ -51,10 +70,10 @@ export default class changeConfig extends Component {
                     </Picker>
                     <Text>MapConfig</Text>
                     <Picker
-                        selectedValue={this.props.config.MapConfig}
+                        selectedValue={this.state.MapConfig}
                         style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
-                            this.valueChange(itemValue,'MapConfig')
+                            this.setState({MapConfig:itemValue})
                         }
 
                     >
@@ -64,10 +83,10 @@ export default class changeConfig extends Component {
                     </Picker>
                     <Text>NewsConfig</Text>
                     <Picker
-                        selectedValue={this.props.config.NewsConfig}
+                        selectedValue={this.state.NewsConfig}
                         style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
-                            this.valueChange(itemValue,'NewsConfig')
+                            this.setState({NewsConfig:itemValue})
                         }
 
                     >
@@ -77,10 +96,10 @@ export default class changeConfig extends Component {
                     </Picker>
                     <Text>DateConfig</Text>
                     <Picker
-                        selectedValue={this.props.config.DateConfig}
+                        selectedValue={this.state.DateConfig}
                         style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
-                            this.valueChange(itemValue,'DateConfig')
+                            this.setState({DateConfig:itemValue})
                         }
 
                     >
@@ -91,17 +110,18 @@ export default class changeConfig extends Component {
                     </Picker>
                 </View>
                 <View>
+                    <Text>Address</Text>
                     <TextInput
                         style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
-                        onChangeText={text => this.onChangeText(text)}
-                        value={this.props.config.Address}
+                        onChangeText={text => this.setState({Address:text})}
+                        value={this.state.Address}
                     />
                 </View>
 
                 <View>
                     <TouchableOpacity
                         style={styles.button}
-                        onPress={this.onPressButton.bind(this)}
+                        onPress={this.onPress}
                     >
                         <Text> Submit </Text>
                     </TouchableOpacity>
