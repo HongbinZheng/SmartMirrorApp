@@ -9,6 +9,8 @@
 import React, { Component } from 'react';  
 import {StyleSheet, Text, View,Button,YellowBox} from 'react-native';  
 import { createBottomTabNavigator, createAppContainer} from 'react-navigation';  
+import { createDrawerNavigator } from 'react-navigation-drawer';
+import { createStackNavigator } from 'react-navigation-stack';
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';  
 import Icon from 'react-native-vector-icons/Ionicons';  
 
@@ -17,6 +19,7 @@ import HomeScreen from './src/HomeScreen/HomeScreen';
 import ProfileScreen from './src/ProfileScreen/ProfileScreen';
 import MirrorSetupScreen from './src/MirrorSetupScreen/MirrorSetUpScreen';
 import LinkAccountScreen from './src/LinkAccountScreen/LinkAccountScreen'
+import ConfigScreen from './src/editDisplayScreen/changeConfig';
 
 YellowBox.ignoreWarnings([
     'Unrecognized WebSocket connection option(s) `agent`, `perMessageDeflate`, `pfx`, `key`, `passphrase`, `cert`, `ca`, `ciphers`, `rejectUnauthorized`. Did you mean to put these under `headers`?'
@@ -90,5 +93,17 @@ const TabNavigator = createMaterialBottomTabNavigator(
     },  
 );  
 
+const StackNavigator = createStackNavigator({
+    ChangeConfig:{
+        screen:ConfigScreen
+    }
+})
 
-const AppContainer = createAppContainer(TabNavigator);
+const AppNavigator = createDrawerNavigator({
+    TabNavigator:TabNavigator,
+    StackNavigator:StackNavigator
+  });
+  
+
+
+const AppContainer = createAppContainer(AppNavigator);
