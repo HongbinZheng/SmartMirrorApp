@@ -12,7 +12,7 @@ export default class changeConfig extends Component {
             WeatherConfig: "",
             MapConfig: "",
             NewsConfig: "",
-            DateConfig: "",
+            CalendarConfig: "",
             Address: "",
             DeviceID:""
         };
@@ -96,22 +96,23 @@ export default class changeConfig extends Component {
 
                     >
                         <Picker.Item label="OFF" value="OFF" />
+                        <Picker.Item label="top-left" value="top-left" />
+                        <Picker.Item label="top-right" value="top-right" />
                         <Picker.Item label="middle-left" value="middle-left" />
                         <Picker.Item label="middle-right" value="middle-right" />
                     </Picker>
-                    <Text>DateConfig</Text>
+                    <Text>CalendarConfig</Text>
                     <Picker
-                        selectedValue={this.state.DateConfig}
+                        selectedValue={this.state.CalendarConfig}
                         style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
-                            this.setState({DateConfig:itemValue})
+                            this.setState({CalendarConfig:itemValue})
                         }
 
                     >
                         <Picker.Item label="OFF" value="OFF" />
-                        <Picker.Item label="top-left" value="top-left" />
-                        <Picker.Item label="top-middle" value="top-middle" />
-                        <Picker.Item label="top-right" value="top-right" />
+                        <Picker.Item label="bottom-left" value="bottom-left" />
+                        <Picker.Item label="bottom-right" value="bottom-right" />
                     </Picker>
                 </View>
                 <View>
