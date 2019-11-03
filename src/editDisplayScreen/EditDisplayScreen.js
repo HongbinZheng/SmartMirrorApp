@@ -39,6 +39,7 @@ class EditDisplayScreen extends Component {
     initAsync = async () => {
         await GoogleSignIn.initAsync({
             clientId: '241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com',
+            isOfflineEnabled:true,
             scopes: [GoogleSignIn.SCOPES.PROFILE, GoogleSignIn.SCOPES.EMAIL, 'https://mail.google.com/', 'https://www.googleapis.com/auth/calendar', "https://www.googleapis.com/auth/calendar.settings.readonly", "https://www.googleapis.com/auth/gmail.labels"]
         });
         this._syncUserWithStateAsync();
@@ -69,10 +70,6 @@ class EditDisplayScreen extends Component {
         socket.on('config:send', (data) => { console.warn(data) })
     }
 
-    valueChange(value, name) {
-        this.setState({ [name]: value });
-    }
-
     onDeviceIDChange(value) {
         // parent class change handler is always called with field name and value
         this.setState({ DeviceID: value });
@@ -99,6 +96,31 @@ class EditDisplayScreen extends Component {
         }).catch(err => { console.warn(err) })
         //this.initAsync();
     }
+
+    signOutAsync = async () => {
+        await GoogleSignIn.signOutAsync();
+        this.setState({ user: null,signedIn:false,DeviceIDList:[] });
+      };
+    
+      signInAsync = async () => {
+        try {
+          await GoogleSignIn.askForPlayServicesAsync();
+          const { type, user } = await GoogleSignIn.signInAsync();
+          if (type === 'success') {
+            this._syncUserWithStateAsync();
+          }
+        } catch ({ message }) {
+          alert('login: Error:' + message);
+        }
+      };
+
+    signIn = () => {
+        if (this.state.user) {
+          this.signOutAsync();
+        } else {
+          this.signInAsync();
+        }
+    };
 
     addDeviceID(){
         params = {
@@ -139,8 +161,13 @@ class EditDisplayScreen extends Component {
         } else {
             if (!this.state.existID) {
                 return (
-                    <View style={{ padding: 10, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ padding: 10, alignItems: 'center', justifyContent: 'center',flex:1 }}>
+                        
+                        <Text>Add Your Device</Text>
                         <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
+                        <Text>--- OR ---</Text>
+                        <Text style={styles.header}>Sign In With Google</Text>
+                        <Button title="Sign in with Google"  onPress={() => this.signIn()} />
                     </View>
                 )
              } else {
@@ -156,7 +183,7 @@ class EditDisplayScreen extends Component {
 
 const styles = StyleSheet.create({
     header: {
-
+        fontSize: 25
     },
     toggles: {
         padding: 20,
