@@ -66,7 +66,7 @@ export default class changeConfig extends Component {
                         onValueChange={(itemValue, itemIndex) =>
                             this.setState({WeatherConfig:itemValue})
                         }
-
+                        itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
                         <Picker.Item label="top-left" value="top-left" />
@@ -76,11 +76,11 @@ export default class changeConfig extends Component {
                     <Text>MapConfig</Text>
                     <Picker
                         selectedValue={this.state.MapConfig}
-                        style={{ height: 50, width: 300 }}
+                        //style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
                             this.setState({MapConfig:itemValue})
                         }
-
+                        itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
                         <Picker.Item label="bottom-left" value="bottom-left" />
@@ -89,11 +89,11 @@ export default class changeConfig extends Component {
                     <Text>NewsConfig</Text>
                     <Picker
                         selectedValue={this.state.NewsConfig}
-                        style={{ height: 50, width: 300 }}
+                        //style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
                             this.setState({NewsConfig:itemValue})
                         }
-
+                        itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
                         <Picker.Item label="top-left" value="top-left" />
@@ -104,11 +104,11 @@ export default class changeConfig extends Component {
                     <Text>CalendarConfig</Text>
                     <Picker
                         selectedValue={this.state.CalendarConfig}
-                        style={{ height: 50, width: 300 }}
+                        //style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
                             this.setState({CalendarConfig:itemValue})
                         }
-
+                        itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
                         <Picker.Item label="bottom-left" value="bottom-left" />
