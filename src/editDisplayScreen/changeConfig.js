@@ -93,7 +93,7 @@ export default class changeConfig extends Component {
                         <Picker.Item label="OFF" value="OFF" />
                         {this.posAvail("middle-left", this.state.MapConfig) ? (<PickerItem label = "middle-left" value = "middle-left"/>) : (null)}
                         {this.posAvail("middle-right", this.state.MapConfig) ? (<PickerItem label = "middle-right" value = "middle-right"/>) : (null)}
-                        {this.posAvail("bottm-left", this.state.MapConfig) ? (<Picker.Item label= "bottom-left" value="bottom-left" />) : (null)}
+                        {this.posAvail("bottom-left", this.state.MapConfig) ? (<Picker.Item label= "bottom-left" value="bottom-left" />) : (null)}
                         {this.posAvail("bottom-middle", this.state.MapConfig) ? (<PickerItem label = "bottom-middle" value = "bottom-middle"/>) : (null)}
                         {this.posAvail("bottom-right", this.state.MapConfig) ? (<Picker.Item label="bottom-right" value="bottom-right" />) : (null)}
                     </Picker>
