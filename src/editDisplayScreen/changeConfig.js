@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert, PickerItem } from 'react-native';
 import { Header } from 'react-native-elements';
 import axios from 'axios'
 import SocketIOClient from 'socket.io-client';
@@ -48,6 +48,15 @@ export default class changeConfig extends Component {
         socket.on('config:send', (data) => { console.warn(data) })
     }
 
+    posAvail(position, config) {
+        if(position === config){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     render() {
         return (
             <View>
@@ -69,9 +78,8 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
-                        <Picker.Item label="top-left" value="top-left" />
-                        <Picker.Item label="top-middle" value="top-middle" />
-                        <Picker.Item label="top-right" value="top-right" />
+                        {this.posAvail("top-left", this.state.WeatherConfig) ? (<Picker.Item label="top-left" value="top-left" />) : (null)}
+                        {this.posAvail("top-right", this.state.WeatherConfig) ? (<Picker.Item label="top-right" value="top-right" />) : (null)}
                     </Picker>
                     <Text>MapConfig</Text>
                     <Picker
@@ -83,8 +91,11 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
-                        <Picker.Item label="bottom-left" value="bottom-left" />
-                        <Picker.Item label="bottom-right" value="bottom-right" />
+                        {this.posAvail("middle-left", this.state.MapConfig) ? (<PickerItem label = "middle-left" value = "middle-left"/>) : (null)}
+                        {this.posAvail("middle-right", this.state.MapConfig) ? (<PickerItem label = "middle-right" value = "middle-right"/>) : (null)}
+                        {this.posAvail("bottm-left", this.state.MapConfig) ? (<Picker.Item label= "bottom-left" value="bottom-left" />) : (null)}
+                        {this.posAvail("bottom-middle", this.state.MapConfig) ? (<PickerItem label = "bottom-middle" value = "bottom-middle"/>) : (null)}
+                        {this.posAvail("bottom-right", this.state.MapConfig) ? (<Picker.Item label="bottom-right" value="bottom-right" />) : (null)}
                     </Picker>
                     <Text>NewsConfig</Text>
                     <Picker
@@ -96,10 +107,8 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
-                        <Picker.Item label="top-left" value="top-left" />
-                        <Picker.Item label="top-right" value="top-right" />
-                        <Picker.Item label="middle-left" value="middle-left" />
-                        <Picker.Item label="middle-right" value="middle-right" />
+                        {this.posAvail("top-left", this.state.NewsConfig) ? (<Picker.Item label="top-left" value="top-left" />) : (null)}
+                        {this.posAvail("top-right", this.state.NewsConfig) ? (<Picker.Item label="top-right" value="top-right" />) : (null)}
                     </Picker>
                     <Text>CalendarConfig</Text>
                     <Picker
@@ -111,8 +120,10 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
-                        <Picker.Item label="bottom-left" value="bottom-left" />
-                        <Picker.Item label="bottom-right" value="bottom-right" />
+                        {this.posAvail("middle-left", this.state.CalendarConfig) ? (<PickerItem label = "middle-left" value = "middle-left"/>) : (null)}
+                        {this.posAvail("middle-right", this.state.CalendarConfig) ? (<PickerItem label = "middle-right" value = "middle-right"/>) : (null)}
+                        {this.posAvail("bottom-left", this.state.CalendarConfig) ? (<Picker.Item label="bottom-left" value="bottom-left" />) : (null)}
+                        {this.posAvail("bottom-right", this.state.CalendarConfig) ? (<Picker.Item label="bottom-right" value="bottom-right" />) : (null)}
                     </Picker>
                 </View>
                 <View>
