@@ -39,6 +39,7 @@ class EditDisplayScreen extends Component {
     initAsync = async () => {
         await GoogleSignIn.initAsync({
             clientId: '241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com',
+            webClientId:'241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com',
             isOfflineEnabled:true,
             scopes: [GoogleSignIn.SCOPES.PROFILE, GoogleSignIn.SCOPES.EMAIL, 'https://mail.google.com/', 'https://www.googleapis.com/auth/calendar', "https://www.googleapis.com/auth/calendar.settings.readonly", "https://www.googleapis.com/auth/gmail.labels"]
         });
@@ -53,6 +54,19 @@ class EditDisplayScreen extends Component {
                     this.setState({DeviceIDList:res.data.DeviceID})
                 }
             })
+            if(user.serverAuthCode){
+                axios.get('http://192.168.1.29:6000/api/getrefreshtoken',{params:{code:user.serverAuthCode}}).then(res=>{    
+                if(res.data.refresh_token){
+                    user.auth.accessToken = res.data.access_token
+                    user.auth.refreshToken = res.data.refresh_token
+                    }else{
+                        user.auth.accessToken = res.data.access_token
+                    }
+                    this.setState({user:user})
+                    alert(JSON.stringify(this.state.user))
+                })
+            }
+            //alert(JSON.stringify(user))
             this.setState({ signedIn: true, user: user });
             socket.emit('apis:receive', { DeviceID: this.state.DeviceID, token: user.accessToken });
             socket.on('apis:send', (data) => { console.warn(data) });
