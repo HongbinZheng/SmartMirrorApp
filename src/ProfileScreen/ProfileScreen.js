@@ -2,7 +2,8 @@ import React from 'react';
 import { Text, View,StyleSheet, Button,Image, ImageBackground } from 'react-native';
 import * as GoogleSignIn from 'expo-google-sign-in';
 import SocketIOClient from 'socket.io-client';
-
+import { AuthSession } from 'expo';
+import * as Google from 'expo-google-app-auth';
 import moment from 'moment';
 import mirror from './mirror.png';
 
@@ -17,12 +18,13 @@ export default class AuthScreen extends React.Component {
       lastName: "",
       photoURL: "",
       user:null,
-      greeting: ''
+      greeting: 'Good Morning, '
     }
   }
 
   componentDidMount() {
     this.initAsync();
+   // this.signInWithGoogleAsync()
     var hour = moment()
             .format('HH');
       
@@ -41,6 +43,8 @@ export default class AuthScreen extends React.Component {
   initAsync = async () => {
     await GoogleSignIn.initAsync({
       clientId: '241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com',
+      webClientId:'241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com',
+      isOfflineEnabled:true,
       scopes: [GoogleSignIn.SCOPES.PROFILE, GoogleSignIn.SCOPES.EMAIL, 'https://mail.google.com/','https://www.googleapis.com/auth/calendar',"https://www.googleapis.com/auth/calendar.settings.readonly","https://www.googleapis.com/auth/gmail.labels" ]
     });
     this._syncUserWithStateAsync();
@@ -53,8 +57,21 @@ export default class AuthScreen extends React.Component {
     }
   };
 
+  // signOutAsync = async () => {
+  //   await GoogleSignIn.signOutAsync();
+  //   this.setState({ user: null,signedIn:false });
+  // };
+
+
   signOutAsync = async () => {
-    await GoogleSignIn.signOutAsync();
+    console.log('s')
+    await Google.logOutAsync({
+      expoClientId:'241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com',
+      androidClientId: '241196821087-usd43h4q9k8dae5imnf470cltjout116.apps.googleusercontent.com',
+      iosClientId: '241196821087-kbb1ipb3km7je4h8c15ka82954o3vk5o.apps.googleusercontent.com',
+      scopes: ['profile', 'email'],
+    });
+    console.log('e')
     this.setState({ user: null,signedIn:false });
   };
 
@@ -70,13 +87,55 @@ export default class AuthScreen extends React.Component {
     }
   };
 
+
+  signInWithGoogleAsync = async() => {
+    try {
+      const { type, accessToken, user } = await Google.logInAsync({
+        expoClientId:'241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com',
+        androidClientId: '241196821087-usd43h4q9k8dae5imnf470cltjout116.apps.googleusercontent.com',
+        iosClientId: '241196821087-kbb1ipb3km7je4h8c15ka82954o3vk5o.apps.googleusercontent.com',
+        scopes: ['profile', 'email','https://mail.google.com/', 'https://www.googleapis.com/auth/calendar', "https://www.googleapis.com/auth/calendar.settings.readonly", "https://www.googleapis.com/auth/gmail.labels"],
+      });
+      let redirectUrl = AuthSession.getRedirectUrl();
+      let result = await AuthSession.startAsync({
+        authUrl:
+          `https://accounts.google.com/o/oauth2/v2/auth?` +
+          `&client_id=241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com` +
+          `&redirect_uri=${encodeURIComponent(redirectUrl)}` +
+          `&response_type=code` +
+          `&access_type=offline` +
+          `&scope=profile`,
+      });
+      console.log(result)
+      if (result.type === 'success') {
+        console.log(result)
+        console.log(user)
+        console.log(accessToken)
+        this.setState({signedIn:true, firstName:user.firstName, lastName:user.lastName,photoURL:user.photoURL,user:user});
+      } else {
+        alert('login: failed:');
+      }
+    } catch (e) {
+      alert('login: Error:' + e);
+    }
+  }
+
   signIn = () => {
     if (this.state.user) {
       this.signOutAsync();
     } else {
-      this.signInAsync();
+      this.signInWithGoogleAsync();
     }
   };
+
+
+  // signIn = () => {
+  //   if (this.state.user) {
+  //     this.signOutAsync();
+  //   } else {
+  //     this.signInAsync();
+  //   }
+  // };
 
   render() {
     return (
@@ -118,7 +177,7 @@ const LoggedInPage = props => {
       </View>
       <View style = {{height: '80%', width: '100%', justifyContent: 'center', alignItems: 'center'}}>
         <ImageBackground style = {{width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center'}}source = {mirror}>
-            <Text style = {{fontSize: 30, fontWeight: 'bold'}}>{this.state.greeting}</Text>
+            {/* <Text style = {{fontSize: 30, fontWeight: 'bold'}}>{this.state.greeting}</Text> */}
             <Text style = {{fontSize: 30, fontWeight: 'bold'}}>{props.firstName}!</Text>
             <Image style = {styles.profilePicWrap} source = {{uri: props.photoURL}}></Image>
         </ImageBackground>

@@ -5,6 +5,16 @@ import axios from 'axios'
 import SocketIOClient from 'socket.io-client';
 const socket = SocketIOClient('http://ec2-18-212-195-64.compute-1.amazonaws.com', { transports: [ 'websocket'] });
 
+
+const DEFAULT = {
+    WeatherConfig: "",
+    MapConfig: "",
+    NewsConfig: "",
+    CalendarConfig: "",
+    Address: "",
+    DeviceID:""
+}
+
 export default class changeConfig extends Component {
     constructor(props) {
         super(props);
@@ -24,6 +34,20 @@ export default class changeConfig extends Component {
         this.handleDeviceID()
     }
 
+    componentWillReceiveProps(nextProps){
+        if (nextProps.navigation.state.params.config.DeviceID !== this.state.DeviceID) {
+            axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/phoneGetDisplay', { params: { DeviceID: nextProps.navigation.state.params.config.DeviceID } }).then(res => {
+                if (res.data.code == 400) {
+                    alert("device not found")
+                } else {
+                    this.setState(res.data);
+                    console.log(this.state)
+                }
+            }).catch(err => { console.warn(err) })
+        }
+    }
+
+
     handleDeviceID() {
         //console.log(this.state)
         axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/phoneGetDisplay', { params: { DeviceID: this.props.navigation.state.params.config.DeviceID } }).then(res => {
@@ -31,7 +55,6 @@ export default class changeConfig extends Component {
                 alert("device not found")
             } else {
                 this.setState(res.data);
-                this.setState({ existID: true })
             }
         }).catch(err => { console.warn(err) })
     }
@@ -48,15 +71,13 @@ export default class changeConfig extends Component {
         socket.on('config:send', (data) => { console.warn(data) })
     }
 
+    pressGoBack(){
+        //this.setState(DEFAULT)
+        //console.log(this.state)
+        this.props.navigation.goBack(null)
+    }
+
     render() {
-        const DEFAULT = {
-            WeatherConfig: "",
-            MapConfig: "",
-            NewsConfig: "",
-            CalendarConfig: "",
-            Address: "",
-            DeviceID:""
-        }
         return (
             <View style = {{height: '100%', width: '100%'}}>
                 <View style = {{height: '50%', width: '100%'}} >
@@ -135,8 +156,7 @@ export default class changeConfig extends Component {
                 <View style= {{height:'12.25%', width: '100%'}}>
                     <TouchableOpacity
                         style = {styles.button}
-                        onPress = {() => {this.setState({DEFAULT})
-                            this.props.navigation.goBack(null)}}>
+                        onPress = {this.pressGoBack.bind(this)}>
                         <Text>Back</Text>
                     </TouchableOpacity>
                 </View>

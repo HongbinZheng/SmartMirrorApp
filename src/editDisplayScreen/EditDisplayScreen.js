@@ -7,6 +7,8 @@ import axios from 'axios';
 import * as GoogleSignIn from 'expo-google-sign-in';
 import SocketIOClient from 'socket.io-client';
 import DialogManager, { ScaleAnimation, DialogContent,DialogComponent  } from 'react-native-dialog-component';
+import { AuthSession } from 'expo';
+import * as Google from 'expo-google-app-auth';
 
 import AddDevice from './addDevice';
 import ChangeConfig from './changeConfig'
@@ -36,6 +38,55 @@ class EditDisplayScreen extends Component {
         this.initAsync();
     }
 
+//////////////////////////////EXPO CLIENT/////////////////////////////////////////////
+
+signInWithGoogleAsync = async() => {
+    try {
+      const { type, accessToken, user } = await Google.logInAsync({
+        expoClientId:'241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com',
+        androidClientId: '241196821087-usd43h4q9k8dae5imnf470cltjout116.apps.googleusercontent.com',
+        iosClientId: '241196821087-kbb1ipb3km7je4h8c15ka82954o3vk5o.apps.googleusercontent.com',
+        scopes: ['profile', 'email','https://mail.google.com/', 'https://www.googleapis.com/auth/calendar', "https://www.googleapis.com/auth/calendar.settings.readonly", "https://www.googleapis.com/auth/gmail.labels"],
+      });
+      let redirectUrl = AuthSession.getRedirectUrl();
+      let result = await AuthSession.startAsync({
+        authUrl:
+          `https://accounts.google.com/o/oauth2/v2/auth?` +
+          `&client_id=241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com` +
+          `&redirect_uri=${encodeURIComponent(redirectUrl)}` +
+          `&response_type=code` +
+          `&access_type=offline` +
+          `&scope=profile`,
+      });
+      console.log(result.params)
+      if (result.type === 'success') {
+        axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/getDeviceList',{params: { user: user.email }}).then(res=>{
+            if(res.data){
+                this.setState({DeviceIDList:res.data.DeviceID})
+            }
+        })
+        user.auth = {
+            refreshToken:result.params.code
+        }
+        this.setState({ signedIn: true, user: user });
+        console.log(this.state)
+      } else {
+        alert('login: failed:');
+      }
+    } catch (e) {
+      alert('login: Error:' + e);
+    }
+  }
+  signIn = () => {
+    if (this.state.user) {
+      this.signOutAsync();
+    } else {
+      this.signInWithGoogleAsync();
+    }
+};
+
+
+////////////////////////////////END EXPO CLIENT//////////////////////////////////////
     initAsync = async () => {
         await GoogleSignIn.initAsync({
             clientId: '241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com',
@@ -112,7 +163,7 @@ class EditDisplayScreen extends Component {
 
     signOutAsync = async () => {
         await GoogleSignIn.signOutAsync();
-        this.setState({ user: null,signedIn:false,DeviceIDList:[] });
+        this.setState({ user: null,signedIn:false,DeviceIDList:[],DeviceID:'' });
     };
 
     signInAsync = async () => {
@@ -127,13 +178,14 @@ class EditDisplayScreen extends Component {
        }
     };
 
-    signIn = () => {
-        if (this.state.user) {
-          this.signOutAsync();
-        } else {
-          this.signInAsync();
-        }
-    };
+    // signIn = () => {
+    //     if (this.state.user) {
+    //       this.signOutAsync();
+    //     } else {
+    //       this.signInAsync();
+    //     }
+    // };
+
 
     addDeviceID(){
         params = {
