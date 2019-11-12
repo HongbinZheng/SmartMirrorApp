@@ -55,7 +55,7 @@ class EditDisplayScreen extends Component {
                 }
             })
             if(user.serverAuthCode){
-                axios.get('http://192.168.1.29:6000/api/getrefreshtoken',{params:{code:user.serverAuthCode}}).then(res=>{    
+                axios.get('https://smartmirrorbackend-258605.appspot.com/api/getrefreshtoken',{params:{code:user.serverAuthCode}}).then(res=>{    
                 if(res.data.refresh_token){
                     user.auth.accessToken = res.data.access_token
                     user.auth.refreshToken = res.data.refresh_token
@@ -63,7 +63,6 @@ class EditDisplayScreen extends Component {
                         user.auth.accessToken = res.data.access_token
                     }
                     this.setState({user:user})
-                    alert(JSON.stringify(this.state.user))
                 })
             }
             //alert(JSON.stringify(user))
@@ -80,7 +79,7 @@ class EditDisplayScreen extends Component {
                 alert("device not found")
             }
         }).catch(err => { console.warn(err) })
-        socket.emit('config:receive', { config: this.state });
+        socket.emit('config:receive', { config: this.state })
         socket.on('config:send', (data) => { console.warn(data) })
     }
 
@@ -114,19 +113,19 @@ class EditDisplayScreen extends Component {
     signOutAsync = async () => {
         await GoogleSignIn.signOutAsync();
         this.setState({ user: null,signedIn:false,DeviceIDList:[] });
-      };
-    
-      signInAsync = async () => {
-        try {
-          await GoogleSignIn.askForPlayServicesAsync();
-          const { type, user } = await GoogleSignIn.signInAsync();
-          if (type === 'success') {
-            this._syncUserWithStateAsync();
-          }
-        } catch ({ message }) {
-          alert('login: Error:' + message);
-        }
-      };
+    };
+
+    signInAsync = async () => {
+      try {
+         await GoogleSignIn.askForPlayServicesAsync();
+         const { type, user } = await GoogleSignIn.signInAsync();
+         if (type === 'success') {
+           this._syncUserWithStateAsync();
+      }
+       } catch ({ message }) {
+         alert('login: Error:' + message);
+       }
+    };
 
     signIn = () => {
         if (this.state.user) {
@@ -154,7 +153,6 @@ class EditDisplayScreen extends Component {
                         return(
                    <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID},user:this.state.user})}><Text>{ID}</Text></TouchableOpacity></View>
                     )
-     
                     })}
                     <Button
                     style={{ top: 40 }}
