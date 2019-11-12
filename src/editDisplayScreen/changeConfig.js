@@ -49,6 +49,14 @@ export default class changeConfig extends Component {
     }
 
     render() {
+        const DEFAULT = {
+            WeatherConfig: "",
+            MapConfig: "",
+            NewsConfig: "",
+            CalendarConfig: "",
+            Address: "",
+            DeviceID:""
+        }
         return (
             <View style = {{height: '100%', width: '100%'}}>
                 <View style = {{height: '50%', width: '100%'}} >
@@ -127,7 +135,8 @@ export default class changeConfig extends Component {
                 <View style= {{height:'12.25%', width: '100%'}}>
                     <TouchableOpacity
                         style = {styles.button}
-                        onPress = {() => this.props.navigation.goBack(null)}>
+                        onPress = {() => {this.setState({DEFAULT})
+                            this.props.navigation.goBack(null)}}>
                         <Text>Back</Text>
                     </TouchableOpacity>
                 </View>

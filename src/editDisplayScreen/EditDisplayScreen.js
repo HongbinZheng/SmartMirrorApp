@@ -165,6 +165,7 @@ class EditDisplayScreen extends Component {
                         </View>
                     </DialogComponent>
                     </View>
+                    <Button title="Sign Out"  onPress={() => this.signIn()} />
                 </View>
             )
         } else {
