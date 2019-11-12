@@ -18,21 +18,21 @@ export default class addDevice extends Component {
 
     render() {
         return (
-            <View>
-            <TextInput
-                style={{ height: 40 }}
-                name="DeviceID"
-                placeholder="Enter Your DeviceID"
-                onChangeText={(text) => this.onFieldChange(text)}
-                value={this.props.DeviceID}
-            />
-            <TouchableOpacity
-                style={styles.button}
-                onPress={this.props.handleDeviceID.bind(this)}
-            >
-                <Text> Submit </Text>
-            </TouchableOpacity>
-        </View>
+            <View style = {{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+                <TextInput
+                    style={{ height: 40 , width: '50%'}}
+                    name="DeviceID"
+                    placeholder="Enter Your DeviceID"
+                    onChangeText={(text) => this.onFieldChange(text)}
+                    value={this.props.DeviceID}
+                />
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={this.props.handleDeviceID.bind(this)}
+                >
+                    <Text> Submit </Text>
+                </TouchableOpacity>
+            </View>
         )
     }
 }
