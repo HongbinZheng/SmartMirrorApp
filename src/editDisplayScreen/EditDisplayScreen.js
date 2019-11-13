@@ -95,7 +95,9 @@ signInWithGoogleAsync = async() => {
       if (result.type === 'success') {
         axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/getDeviceList',{params: { user: user.email }}).then(res=>{
             if(res.data){
-                this.setState({DeviceIDList:res.data.DeviceID})
+                console.log(res.data + '           data')
+                if(res.data.DeviceID)
+                    this.setState({DeviceIDList:res.data.DeviceID})
             }
         })
         axios.get('https://expoclientbackend.appspot.com/api/getrefreshtoken',{params:{code:result.params.code, uri:redirectUrl}}).then(async res=>{    
@@ -151,9 +153,11 @@ signInWithGoogleAsync = async() => {
         if (user) {
             axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/getDeviceList',{params: { user: user.email }}).then(res=>{
                 if(res.data){
-                    this.setState({DeviceIDList:res.data.DeviceID})
+                    console.log(res.data + '           data')
+                    if(res.data.DeviceID)
+                        this.setState({DeviceIDList:res.data.DeviceID})
                 }
-            })
+            }).catch(err=>{console.log('e'+ err)})
             if(user.serverAuthCode){
                 axios.get('https://smartmirrorbackend-258605.appspot.com/api/getrefreshtoken',{params:{code:user.serverAuthCode}}).then(res=>{    
                 if(res.data.refresh_token){
@@ -254,7 +258,7 @@ signInWithGoogleAsync = async() => {
                         <Text style = {{color: 'white', fontSize: 20}}>Edit Display</Text>
                     </View>
                     <View style = {{height: '90%', width: '100%'}}>
-                        {this.state.DeviceIDList.length > 0 ? this.state.DeviceIDList.map(ID=>{
+                        {this.state.DeviceIDList.length !== 0 ? this.state.DeviceIDList.map(ID=>{
                         return(
                    <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID},user:this.state.user})}><Text>{ID}</Text></TouchableOpacity></View>
                     )
