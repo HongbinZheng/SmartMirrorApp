@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert,Button } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert,Button,AsyncStorage } from 'react-native';
 
 import ToggleSwitch from 'toggle-switch-react-native'
 import { Header } from 'react-native-elements';
@@ -38,6 +38,40 @@ class EditDisplayScreen extends Component {
         this.initAsync();
     }
 
+////////////////////Async Storage/////////////////////////////////////////
+async _storeData(refreshToken,email){
+    try {
+        console.log('here 1')
+      await AsyncStorage.setItem('email',email)
+      console.log('done 1')
+      await AsyncStorage.setItem('refreshToken', refreshToken);
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  async _retrieveData(email) {
+    try {
+        console.log('here 2')
+      const value = await AsyncStorage.getItem('email');
+      if (value !== null) {
+        if(email === value){
+            try{
+                const refreshtoken = await AsyncStorage.getItem('refreshToken');
+                console.log("refreshtoken " + refreshtoken);
+                return refreshtoken;
+            }catch (e){
+                console.log('e ' + e);
+            }
+        }
+      }
+    } catch (error) {
+      console.log(err)
+    }
+    return null;
+  };
+//////////////////End Async Storage//////////////////////////////////
+
 //////////////////////////////EXPO CLIENT/////////////////////////////////////////////
 
 signInWithGoogleAsync = async() => {
@@ -56,18 +90,33 @@ signInWithGoogleAsync = async() => {
           `&redirect_uri=${encodeURIComponent(redirectUrl)}` +
           `&response_type=code` +
           `&access_type=offline` +
-          `&scope=profile`,
+          `&scope=profile%20email%20https://mail.google.com/%20https://www.googleapis.com/auth/calendar`
       });
-      console.log(result.params)
       if (result.type === 'success') {
         axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/getDeviceList',{params: { user: user.email }}).then(res=>{
             if(res.data){
                 this.setState({DeviceIDList:res.data.DeviceID})
             }
         })
-        user.auth = {
-            refreshToken:result.params.code
-        }
+        axios.get('https://expoclientbackend.appspot.com/api/getrefreshtoken',{params:{code:result.params.code, uri:redirectUrl}}).then(async res=>{    
+            if(res.data.refresh_token){
+                console.log('with token')
+                this._storeData(res.data.refresh_token,user.email)
+                user.auth = {
+                    refreshToken:res.data.refresh_token,
+                    accessToken : res.data.access_token
+                }
+                }else{
+                    console.log('no token')
+                    const refreshToken = await this._retrieveData(user.email)
+                    console.log(refreshToken)
+                    user.auth = {
+                        refreshToken:refreshToken,
+                        accessToken : res.data.access_token
+                    }
+                }
+                this.setState({user:user})
+            })
         this.setState({ signedIn: true, user: user });
         console.log(this.state)
       } else {
@@ -205,12 +254,11 @@ signInWithGoogleAsync = async() => {
                         <Text style = {{color: 'white', fontSize: 20}}>Edit Display</Text>
                     </View>
                     <View style = {{height: '90%', width: '100%'}}>
-                    {this.state.DeviceIDList.map(ID=>{
+                        {this.state.DeviceIDList.length > 0 ? this.state.DeviceIDList.map(ID=>{
                         return(
                    <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID},user:this.state.user})}><Text>{ID}</Text></TouchableOpacity></View>
                     )
-                    })}
-
+                    }):null}
                     <Button
                     style={{ top: 40 }}
                         title="Add"

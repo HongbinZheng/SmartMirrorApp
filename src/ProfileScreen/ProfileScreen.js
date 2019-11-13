@@ -97,6 +97,7 @@ export default class AuthScreen extends React.Component {
         scopes: ['profile', 'email','https://mail.google.com/', 'https://www.googleapis.com/auth/calendar', "https://www.googleapis.com/auth/calendar.settings.readonly", "https://www.googleapis.com/auth/gmail.labels"],
       });
       let redirectUrl = AuthSession.getRedirectUrl();
+      console.log("url"+redirectUrl)
       let result = await AuthSession.startAsync({
         authUrl:
           `https://accounts.google.com/o/oauth2/v2/auth?` +
@@ -104,13 +105,13 @@ export default class AuthScreen extends React.Component {
           `&redirect_uri=${encodeURIComponent(redirectUrl)}` +
           `&response_type=code` +
           `&access_type=offline` +
-          `&scope=profile`,
+          `&scope=profile%20email%20https://mail.google.com/%20https://www.googleapis.com/auth/calendar`
       });
       console.log(result)
       if (result.type === 'success') {
-        console.log(result)
-        console.log(user)
-        console.log(accessToken)
+        console.log("result: "+ JSON.stringify(result))
+        console.log("user " + user)
+        console.log("accessToken " + accessToken)
         this.setState({signedIn:true, firstName:user.firstName, lastName:user.lastName,photoURL:user.photoURL,user:user});
       } else {
         alert('login: failed:');
