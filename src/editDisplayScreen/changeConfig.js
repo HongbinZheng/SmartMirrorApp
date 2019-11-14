@@ -93,7 +93,6 @@ export default class changeConfig extends Component {
                     >
                         <Picker.Item label="OFF" value="OFF" />
                         <Picker.Item label="top-left" value="top-left" />
-                        <Picker.Item label="top-middle" value="top-middle" />
                         <Picker.Item label="top-right" value="top-right" />
                     </Picker>
                     <Text style = {styles.font}>MapConfig</Text>
@@ -106,7 +105,10 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
+                        <Picker.Item label="middle-left" value="middle-left" />
+                        <Picker.Item label="middle-right" value="middle-right" />
                         <Picker.Item label="bottom-left" value="bottom-left" />
+                        <Picker.Item label="bottom-middle" value="bottom-middle"/>
                         <Picker.Item label="bottom-right" value="bottom-right" />
                     </Picker>
                     <Text style = {styles.font}>NewsConfig</Text>
@@ -121,8 +123,6 @@ export default class changeConfig extends Component {
                         <Picker.Item label="OFF" value="OFF" />
                         <Picker.Item label="top-left" value="top-left" />
                         <Picker.Item label="top-right" value="top-right" />
-                        <Picker.Item label="middle-left" value="middle-left" />
-                        <Picker.Item label="middle-right" value="middle-right" />
                     </Picker>
                     <Text style = {styles.font}>CalendarConfig</Text>
                     <Picker
@@ -134,6 +134,8 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
+                        <Picker.Item label="middle-left" value="middle-left" />
+                        <Picker.Item label="middle-right" value="middle-right" />
                         <Picker.Item label="bottom-left" value="bottom-left" />
                         <Picker.Item label="bottom-right" value="bottom-right" />
                     </Picker>
@@ -147,7 +149,12 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
-                        <Picker.Item label="center" value="center" />
+                        <Picker.Item label="top-left" value="top-left" />
+                        <Picker.Item label="top-right" value="top-right" />
+                        <Picker.Item label="middle-left" value="middle-left" />
+                        <Picker.Item label="middle-right" value="middle-right" />
+                        <Picker.Item label="bottom-left" value="bottom-left" />
+                        <Picker.Item label="bottom-right" value="bottom-right" />
                     </Picker>
                 </View>
                 <View style = {{height: '25%', width: '100%'}}>
