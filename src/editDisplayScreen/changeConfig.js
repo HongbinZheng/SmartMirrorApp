@@ -24,7 +24,8 @@ export default class changeConfig extends Component {
             NewsConfig: "",
             CalendarConfig: "",
             Address: "",
-            DeviceID:""
+            DeviceID:"",
+            GmailConfig:""
         };
     }
 
@@ -135,6 +136,18 @@ export default class changeConfig extends Component {
                         <Picker.Item label="OFF" value="OFF" />
                         <Picker.Item label="bottom-left" value="bottom-left" />
                         <Picker.Item label="bottom-right" value="bottom-right" />
+                    </Picker>
+                    <Text style = {styles.font}>GmaiConfig</Text>
+                    <Picker
+                        selectedValue={this.state.GmailConfig}
+                        //style={{ height: 50, width: 300 }}
+                        onValueChange={(itemValue, itemIndex) =>
+                            this.setState({GmailConfig:itemValue})
+                        }
+                        itemStyle={{height:44}}
+                    >
+                        <Picker.Item label="OFF" value="OFF" />
+                        <Picker.Item label="center" value="center" />
                     </Picker>
                 </View>
                 <View style = {{height: '25%', width: '100%'}}>
