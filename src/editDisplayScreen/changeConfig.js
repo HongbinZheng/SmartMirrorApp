@@ -81,7 +81,7 @@ export default class changeConfig extends Component {
     render() {
         return (
             <View style = {{height: '100%', width: '100%'}}>
-                <View style = {{height: '50%', width: '100%'}} >
+                <View style = {{height: '40%', width: '100%'}} >
                     <Text style = {styles.font}>WeatherConfig</Text>
                     <Picker
                         selectedValue={this.state.WeatherConfig}
@@ -139,7 +139,7 @@ export default class changeConfig extends Component {
                         <Picker.Item label="bottom-left" value="bottom-left" />
                         <Picker.Item label="bottom-right" value="bottom-right" />
                     </Picker>
-                    <Text style = {styles.font}>GmaiConfig</Text>
+                    <Text style = {styles.font}>GmailConfig</Text>
                     <Picker
                         selectedValue={this.state.GmailConfig}
                         //style={{ height: 50, width: 300 }}
@@ -157,7 +157,7 @@ export default class changeConfig extends Component {
                         <Picker.Item label="bottom-right" value="bottom-right" />
                     </Picker>
                 </View>
-                <View style = {{height: '25%', width: '100%'}}>
+                <View style = {{height: '35%', width: '100%', justifyContent: 'center'}}>
                     <Text style = {styles.font}>Address</Text>
                     <TextInput
                         style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
