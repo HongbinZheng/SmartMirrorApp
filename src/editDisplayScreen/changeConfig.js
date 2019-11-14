@@ -157,12 +157,12 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
-                        <Picker.Item label="top-left" value="top-left" />
-                        <Picker.Item label="top-right" value="top-right" />
-                        <Picker.Item label="middle-left" value="middle-left" />
-                        <Picker.Item label="middle-right" value="middle-right" />
-                        <Picker.Item label="bottom-left" value="bottom-left" />
-                        <Picker.Item label="bottom-right" value="bottom-right" />
+                        {this.posAvail("top-left") ? (<Picker.Item label="top-left" value="top-left" />) : (null)}
+                        {this.posAvail("top-right") ? (<Picker.Item label="top-right" value="top-right" />) : (null)}
+                        {this.posAvail("middle-left") ? (<PickerItem label = "middle-left" value = "middle-left"/>) : (null)}
+                        {this.posAvail("middle-right") ? (<PickerItem label = "middle-right" value = "middle-right"/>) : (null)}
+                        {this.posAvail("bottom-left") ? (<Picker.Item label="bottom-left" value="bottom-left" />) : (null)}
+                        {this.posAvail("bottom-right") ? (<Picker.Item label="bottom-right" value="bottom-right" />) : (null)}
                     </Picker>
                 </View>
                 <View style = {{height: '25%', width: '100%'}}>
