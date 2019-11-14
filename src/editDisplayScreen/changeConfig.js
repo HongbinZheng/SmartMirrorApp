@@ -5,6 +5,16 @@ import axios from 'axios'
 import SocketIOClient from 'socket.io-client';
 const socket = SocketIOClient('http://ec2-18-212-195-64.compute-1.amazonaws.com', { transports: [ 'websocket'] });
 
+
+const DEFAULT = {
+    WeatherConfig: "",
+    MapConfig: "",
+    NewsConfig: "",
+    CalendarConfig: "",
+    Address: "",
+    DeviceID:""
+}
+
 export default class changeConfig extends Component {
     constructor(props) {
         super(props);
@@ -24,6 +34,20 @@ export default class changeConfig extends Component {
         this.handleDeviceID()
     }
 
+    componentWillReceiveProps(nextProps){
+        if (nextProps.navigation.state.params.config.DeviceID !== this.state.DeviceID) {
+            axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/phoneGetDisplay', { params: { DeviceID: nextProps.navigation.state.params.config.DeviceID } }).then(res => {
+                if (res.data.code == 400) {
+                    alert("device not found")
+                } else {
+                    this.setState(res.data);
+                    console.log(this.state)
+                }
+            }).catch(err => { console.warn(err) })
+        }
+    }
+
+
     handleDeviceID() {
         //console.log(this.state)
         axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/phoneGetDisplay', { params: { DeviceID: this.props.navigation.state.params.config.DeviceID } }).then(res => {
@@ -31,7 +55,6 @@ export default class changeConfig extends Component {
                 alert("device not found")
             } else {
                 this.setState(res.data);
-                this.setState({ existID: true })
             }
         }).catch(err => { console.warn(err) })
     }
@@ -56,22 +79,20 @@ export default class changeConfig extends Component {
             return false;
         }
     }
+    pressGoBack(){
+        //this.setState(DEFAULT)
+        //console.log(this.state)
+        this.props.navigation.goBack(null)
+    }
 
     render() {
         return (
-            <View>
-                <View>
-                    <Header
-                        backgroundColor='#67baf6'
-                        centerComponent={{ text: 'Edit Display Setting', style: { color: '#fff' } }}
-                    />
-                </View>
-
-                <View >
-                    <Text>WeatherConfig</Text>
+            <View style = {{height: '100%', width: '100%'}}>
+                <View style = {{height: '50%', width: '100%'}} >
+                    <Text style = {styles.font}>WeatherConfig</Text>
                     <Picker
                         selectedValue={this.state.WeatherConfig}
-                        style={{ height: 50, width: 300 }}
+                        //style={{ height: 50, width: 300 }}
                         onValueChange={(itemValue, itemIndex) =>
                             this.setState({WeatherConfig:itemValue})
                         }
@@ -81,7 +102,7 @@ export default class changeConfig extends Component {
                         {this.posAvail("top-left", this.state.WeatherConfig) ? (<Picker.Item label="top-left" value="top-left" />) : (null)}
                         {this.posAvail("top-right", this.state.WeatherConfig) ? (<Picker.Item label="top-right" value="top-right" />) : (null)}
                     </Picker>
-                    <Text>MapConfig</Text>
+                    <Text style = {styles.font}>MapConfig</Text>
                     <Picker
                         selectedValue={this.state.MapConfig}
                         //style={{ height: 50, width: 300 }}
@@ -97,7 +118,7 @@ export default class changeConfig extends Component {
                         {this.posAvail("bottom-middle", this.state.MapConfig) ? (<PickerItem label = "bottom-middle" value = "bottom-middle"/>) : (null)}
                         {this.posAvail("bottom-right", this.state.MapConfig) ? (<Picker.Item label="bottom-right" value="bottom-right" />) : (null)}
                     </Picker>
-                    <Text>NewsConfig</Text>
+                    <Text style = {styles.font}>NewsConfig</Text>
                     <Picker
                         selectedValue={this.state.NewsConfig}
                         //style={{ height: 50, width: 300 }}
@@ -110,7 +131,7 @@ export default class changeConfig extends Component {
                         {this.posAvail("top-left", this.state.NewsConfig) ? (<Picker.Item label="top-left" value="top-left" />) : (null)}
                         {this.posAvail("top-right", this.state.NewsConfig) ? (<Picker.Item label="top-right" value="top-right" />) : (null)}
                     </Picker>
-                    <Text>CalendarConfig</Text>
+                    <Text style = {styles.font}>CalendarConfig</Text>
                     <Picker
                         selectedValue={this.state.CalendarConfig}
                         //style={{ height: 50, width: 300 }}
@@ -126,21 +147,27 @@ export default class changeConfig extends Component {
                         {this.posAvail("bottom-right", this.state.CalendarConfig) ? (<Picker.Item label="bottom-right" value="bottom-right" />) : (null)}
                     </Picker>
                 </View>
-                <View>
-                    <Text>Address</Text>
+                <View style = {{height: '25%', width: '100%'}}>
+                    <Text style = {styles.font}>Address</Text>
                     <TextInput
                         style={{ height: 40, borderColor: 'gray', borderWidth: 1 }}
                         onChangeText={text => this.setState({Address:text})}
                         value={this.state.Address}
                     />
                 </View>
-
-                <View>
+                <View style= {{height: '12.25%', width: '100%'}}>
                     <TouchableOpacity
                         style={styles.button}
                         onPress={this.onPress.bind(this)}
                     >
                         <Text> Submit </Text>
+                    </TouchableOpacity>
+                </View>
+                <View style= {{height:'12.25%', width: '100%'}}>
+                    <TouchableOpacity
+                        style = {styles.button}
+                        onPress = {this.pressGoBack.bind(this)}>
+                        <Text>Back</Text>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -164,5 +191,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: '#DDDDDD',
         padding: 10
-      }
+      },
+    font: {
+        fontWeight: 'bold',
+        fontSize: 16
+    }
 })

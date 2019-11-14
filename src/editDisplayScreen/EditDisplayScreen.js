@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert,Button } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert,Button,AsyncStorage } from 'react-native';
 
 import ToggleSwitch from 'toggle-switch-react-native'
 import { Header } from 'react-native-elements';
@@ -7,6 +7,8 @@ import axios from 'axios';
 import * as GoogleSignIn from 'expo-google-sign-in';
 import SocketIOClient from 'socket.io-client';
 import DialogManager, { ScaleAnimation, DialogContent,DialogComponent  } from 'react-native-dialog-component';
+import { AuthSession } from 'expo';
+import * as Google from 'expo-google-app-auth';
 
 import AddDevice from './addDevice';
 import ChangeConfig from './changeConfig'
@@ -36,6 +38,106 @@ class EditDisplayScreen extends Component {
         this.initAsync();
     }
 
+////////////////////Async Storage/////////////////////////////////////////
+async _storeData(refreshToken,email){
+    try {
+        console.log('here 1')
+      await AsyncStorage.setItem('email',email)
+      console.log('done 1')
+      await AsyncStorage.setItem('refreshToken', refreshToken);
+    } catch (error) {
+      console.log(error)
+    }
+  };
+
+  async _retrieveData(email) {
+    try {
+        console.log('here 2')
+      const value = await AsyncStorage.getItem('email');
+      if (value !== null) {
+        if(email === value){
+            try{
+                const refreshtoken = await AsyncStorage.getItem('refreshToken');
+                console.log("refreshtoken " + refreshtoken);
+                return refreshtoken;
+            }catch (e){
+                console.log('e ' + e);
+            }
+        }
+      }
+    } catch (error) {
+      console.log(err)
+    }
+    return null;
+  };
+//////////////////End Async Storage//////////////////////////////////
+
+//////////////////////////////EXPO CLIENT/////////////////////////////////////////////
+
+signInWithGoogleAsync = async() => {
+    try {
+      const { type, accessToken, user } = await Google.logInAsync({
+        expoClientId:'241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com',
+        androidClientId: '241196821087-usd43h4q9k8dae5imnf470cltjout116.apps.googleusercontent.com',
+        iosClientId: '241196821087-kbb1ipb3km7je4h8c15ka82954o3vk5o.apps.googleusercontent.com',
+        scopes: ['profile', 'email','https://mail.google.com/', 'https://www.googleapis.com/auth/calendar', "https://www.googleapis.com/auth/calendar.settings.readonly", "https://www.googleapis.com/auth/gmail.labels"],
+      });
+      let redirectUrl = AuthSession.getRedirectUrl();
+      let result = await AuthSession.startAsync({
+        authUrl:
+          `https://accounts.google.com/o/oauth2/v2/auth?` +
+          `&client_id=241196821087-q2rmktbrsu06bs2t3m3f4prcr3abr1a9.apps.googleusercontent.com` +
+          `&redirect_uri=${encodeURIComponent(redirectUrl)}` +
+          `&response_type=code` +
+          `&access_type=offline` +
+          `&scope=profile%20email%20https://mail.google.com/%20https://www.googleapis.com/auth/calendar`
+      });
+      if (result.type === 'success') {
+        axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/getDeviceList',{params: { user: user.email }}).then(res=>{
+            if(res.data){
+                console.log(res.data + '           data')
+                if(res.data.DeviceID)
+                    this.setState({DeviceIDList:res.data.DeviceID})
+            }
+        })
+        axios.get('https://expoclientbackend.appspot.com/api/getrefreshtoken',{params:{code:result.params.code, uri:redirectUrl}}).then(async res=>{    
+            if(res.data.refresh_token){
+                console.log('with token')
+                this._storeData(res.data.refresh_token,user.email)
+                user.auth = {
+                    refreshToken:res.data.refresh_token,
+                    accessToken : res.data.access_token
+                }
+                }else{
+                    console.log('no token')
+                    const refreshToken = await this._retrieveData(user.email)
+                    console.log(refreshToken)
+                    user.auth = {
+                        refreshToken:refreshToken,
+                        accessToken : res.data.access_token
+                    }
+                }
+                this.setState({user:user})
+            })
+        this.setState({ signedIn: true, user: user });
+        console.log(this.state)
+      } else {
+        alert('login: failed:');
+      }
+    } catch (e) {
+      alert('login: Error:' + e);
+    }
+  }
+  signIn = () => {
+    if (this.state.user) {
+      this.signOutAsync();
+    } else {
+      this.signInWithGoogleAsync();
+    }
+};
+
+
+////////////////////////////////END EXPO CLIENT//////////////////////////////////////
     initAsync = async () => {
         await GoogleSignIn.initAsync({
             clientId: '241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd.apps.googleusercontent.com',
@@ -51,9 +153,11 @@ class EditDisplayScreen extends Component {
         if (user) {
             axios.get('http://ec2-18-212-195-64.compute-1.amazonaws.com/api/getDeviceList',{params: { user: user.email }}).then(res=>{
                 if(res.data){
-                    this.setState({DeviceIDList:res.data.DeviceID})
+                    console.log(res.data + '           data')
+                    if(res.data.DeviceID)
+                        this.setState({DeviceIDList:res.data.DeviceID})
                 }
-            })
+            }).catch(err=>{console.log('e'+ err)})
             if(user.serverAuthCode){
                 axios.get('https://smartmirrorbackend-258605.appspot.com/api/getrefreshtoken',{params:{code:user.serverAuthCode}}).then(res=>{    
                 if(res.data.refresh_token){
@@ -112,7 +216,7 @@ class EditDisplayScreen extends Component {
 
     signOutAsync = async () => {
         await GoogleSignIn.signOutAsync();
-        this.setState({ user: null,signedIn:false,DeviceIDList:[] });
+        this.setState({ user: null,signedIn:false,DeviceIDList:[],DeviceID:'' });
     };
 
     signInAsync = async () => {
@@ -127,13 +231,14 @@ class EditDisplayScreen extends Component {
        }
     };
 
-    signIn = () => {
-        if (this.state.user) {
-          this.signOutAsync();
-        } else {
-          this.signInAsync();
-        }
-    };
+    // signIn = () => {
+    //     if (this.state.user) {
+    //       this.signOutAsync();
+    //     } else {
+    //       this.signInAsync();
+    //     }
+    // };
+
 
     addDeviceID(){
         params = {
@@ -148,12 +253,16 @@ class EditDisplayScreen extends Component {
     render() {
         if (this.state.user !== null) {
             return (
-                <View style={{top:50}}>
-                    {this.state.DeviceIDList.map(ID=>{
+                <View style={{ justifyContent:'center', alignItems:'center', height:'100%', width: '100%'}}>
+                    <View style = {{backgroundColor: '#67baf6', width: '100%', height: '10%', justifyContent:'center', alignItems: 'center'}}>
+                        <Text style = {{color: 'white', fontSize: 20}}>Edit Display</Text>
+                    </View>
+                    <View style = {{height: '90%', width: '100%'}}>
+                        {this.state.DeviceIDList.length !== 0 ? this.state.DeviceIDList.map(ID=>{
                         return(
                    <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID},user:this.state.user})}><Text>{ID}</Text></TouchableOpacity></View>
                     )
-                    })}
+                    }):null}
                     <Button
                     style={{ top: 40 }}
                         title="Add"
@@ -168,19 +277,28 @@ class EditDisplayScreen extends Component {
                         <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
                         </View>
                     </DialogComponent>
+                    </View>
+                    <Button title="Sign Out"  onPress={() => this.signIn()} />
                 </View>
             )
         } else {
             if (!this.state.existID) {
                 return (
-                    <View style={{ padding: 10, alignItems: 'center', justifyContent: 'center',flex:1 }}>
-                        
-                        <Text>Add Your Device</Text>
-                        <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
-                        <Text>--- OR ---</Text>
-                        <Text style={styles.header}>Sign In With Google</Text>
-                        <Button title="Sign in with Google"  onPress={() => this.signIn()} />
-                    </View>
+                    <View style = {{height: '100%', width: '100%'}}>
+                        <View style = {{backgroundColor: '#67baf6', width: '100%', height: '10%', justifyContent:'center', alignItems: 'center'}}>
+                            <Text style = {{color: 'white', fontSize: 20}}>Edit Display</Text>
+                        </View>
+                        <View style={{ padding: 10, alignItems: 'center', justifyContent: 'center',flex:1, height: '90%', width: '100%' }}>
+                            <Text style = {{fontSize: 25}}>Add Your Device</Text>
+                            <Text style = {{color: 'gray'}}>Please enter DeviceID exactly as shown on the smart mirror.{"\n"}</Text>
+                            <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
+                            <Text>{"\n"}</Text>
+                            <Text>--- OR ---</Text>
+                            <Text>{"\n"}</Text>
+                            <Text style={styles.header}>Sign In With Google</Text>
+                            <Button title="Sign in with Google"  onPress={() => this.signIn()} />
+                        </View>
+                    </View>   
                 )
              } else {
                 return (
