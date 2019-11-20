@@ -33,15 +33,15 @@ export default class App extends Component {
 
 const TabNavigator = createMaterialBottomTabNavigator(  
     {  
-        Profile: { screen: ProfileScreen,  
-            navigationOptions:{  
-                tabBarLabel:'Profile',  
-                tabBarIcon: ({ tintColor }) => (  
-                    <View>  
-                        <Icon style={[{color: tintColor}]} size={25} name={'ios-person'}/>  
-                    </View>), 
-            }  
-        },  
+        // Profile: { screen: ProfileScreen,  
+        //     navigationOptions:{  
+        //         tabBarLabel:'Profile',  
+        //         tabBarIcon: ({ tintColor }) => (  
+        //             <View>  
+        //                 <Icon style={[{color: tintColor}]} size={25} name={'ios-person'}/>  
+        //             </View>), 
+        //     }  
+        // },  
         EditDisplay: { screen: EditDisplayScreen,  
             navigationOptions:{  
                 tabBarLabel:'Edit Display',  
@@ -53,7 +53,7 @@ const TabNavigator = createMaterialBottomTabNavigator(
         },  
     },  
     {  
-      initialRouteName: "Profile",  
+      initialRouteName: "EditDisplay",  
       activeColor: '#615af6',  
       inactiveColor: '#b0d2f2',  
       barStyle: { backgroundColor: '#67baf6' }, 

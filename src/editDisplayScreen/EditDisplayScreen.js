@@ -278,7 +278,7 @@ signInWithGoogleAsync = async() => {
                         </View>
                     </DialogComponent>
                     </View>
-                    <Button title="Sign Out"  onPress={() => this.signIn()} />
+                    {/* <Button title="Sign Out"  onPress={() => this.signIn()} /> */}
                 </View>
             )
         } else {
