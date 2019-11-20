@@ -257,7 +257,7 @@ signInWithGoogleAsync = async() => {
                     <View style = {{backgroundColor: '#67baf6', width: '100%', height: '10%', justifyContent:'center', alignItems: 'center'}}>
                         <Text style = {{color: 'white', fontSize: 20}}>Edit Display</Text>
                     </View>
-                    <View style = {{height: '90%', width: '100%'}}>
+                    <View style = {{height: '90%', width: '100%', alignItems: 'center'}}>
                         {this.state.DeviceIDList.length !== 0 ? this.state.DeviceIDList.map(ID=>{
                         return(
                    <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID},user:this.state.user})}><Text>{ID}</Text></TouchableOpacity></View>
