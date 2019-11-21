@@ -23,6 +23,7 @@ class EditDisplayScreen extends Component {
             MapConfig: "OFF",
             NewsConfig: "OFF",
             DateConfig: "OFF",
+            GmailConfig: "OFF",
             DeviceID: "",//"9c:b6:d0:e6:ef:53",
             DeviceIDList:[],
             Address:'',
