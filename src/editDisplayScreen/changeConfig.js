@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Picker, TextInput, Alert,ScrollView } from 'react-native';
 import { Header } from 'react-native-elements';
 import axios from 'axios'
 import SocketIOClient from 'socket.io-client';
@@ -83,7 +83,7 @@ export default class changeConfig extends Component {
     render() {
         return (
             <View style = {{height: '100%', width: '100%'}}>
-                <View style = {{height: '40%', width: '100%'}} >
+                <ScrollView style = {{height: '40%', width: '100%'}} >
                     <Text style = {styles.font}>WeatherConfig</Text>
                     <Picker
                         selectedValue={this.state.WeatherConfig}
@@ -153,14 +153,14 @@ export default class changeConfig extends Component {
                         itemStyle={{height:44}}
                     >
                         <Picker.Item label="OFF" value="OFF" />
+                        <Picker.Item label="top-left" value="top-left" />
+                        <Picker.Item label="top-right" value="top-right" />
                         <Picker.Item label="middle-left" value="middle-left" />
-                        <Picker.Item label="middle-left" value="top-left" />
-                        <Picker.Item label="middle-left" value="top-right" />
                         <Picker.Item label="middle-right" value="middle-right" />
                         <Picker.Item label="bottom-left" value="bottom-left" />
                         <Picker.Item label="bottom-right" value="bottom-right" />
                     </Picker>
-                </View>
+                </ScrollView>
                 <View style = {{height: '35%', width: '100%', justifyContent: 'center'}}>
                     <Text style = {styles.font}>Address</Text>
                     <TextInput
