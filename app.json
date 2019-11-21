@@ -28,7 +28,7 @@
       "bundleIdentifier": "smart.mirror.googlesignin",
       "config":{
         "googleSignIn":{
-          "reservedClientId":"com.googleusercontent.apps.241196821087-qg8t0hmd41rjt6nqg1hfoi8qngasurfd"
+          "reservedClientId":"<YOUR_IOS_CLIENT_ID>"
         }
       }
 
@@ -38,7 +38,7 @@
       "googleServicesFile":"./google-services.json",
       "config": {
         "googleSignIn": {
-            "certificateHash": "35:AF:71:3B:24:2B:72:F4:D3:01:66:84:24:75:0F:15:C2:74:00:E8"
+            "certificateHash": "YOUR HASH"
         }
     }
     }
