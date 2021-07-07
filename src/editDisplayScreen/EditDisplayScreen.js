@@ -148,12 +148,21 @@ class EditDisplayScreen extends Component {
     render() {
         if (this.state.user !== null) {
             return (
-                <View style={{top:50}}>
+                <View style={{ justifyContent:'center', alignItems:'center', height:'100%', width: '100%'}}>
+                    <View style = {{backgroundColor: '#67baf6', width: '100%', height: '10%', justifyContent:'center', alignItems: 'center'}}>
+                        <Text style = {{color: 'white', fontSize: 20}}>Edit Display</Text>
+                    </View>
+                    <View style = {{height: '90%', width: '100%'}}>
                     {this.state.DeviceIDList.map(ID=>{
                         return(
-                   <View><TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID},user:this.state.user})}><Text>{ID}</Text></TouchableOpacity></View>
-                    )
+                            <View style = {{justifyContent: 'center', alignItems: 'center'}}>
+                                <TouchableOpacity onPress={()=>this.props.navigation.navigate('ChangeConfig',{config:{DeviceID:ID},user:this.state.user})}>
+                                    <Text style = {{fontSize: 20}}>{ID}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )
                     })}
+
                     <Button
                     style={{ top: 40 }}
                         title="Add"
@@ -168,19 +177,27 @@ class EditDisplayScreen extends Component {
                         <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
                         </View>
                     </DialogComponent>
+                    </View>
                 </View>
             )
         } else {
             if (!this.state.existID) {
                 return (
-                    <View style={{ padding: 10, alignItems: 'center', justifyContent: 'center',flex:1 }}>
-                        
-                        <Text>Add Your Device</Text>
-                        <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
-                        <Text>--- OR ---</Text>
-                        <Text style={styles.header}>Sign In With Google</Text>
-                        <Button title="Sign in with Google"  onPress={() => this.signIn()} />
-                    </View>
+                    <View style = {{height: '100%', width: '100%'}}>
+                        <View style = {{backgroundColor: '#67baf6', width: '100%', height: '10%', justifyContent:'center', alignItems: 'center'}}>
+                            <Text style = {{color: 'white', fontSize: 20}}>Edit Display</Text>
+                        </View>
+                        <View style={{ padding: 10, alignItems: 'center', justifyContent: 'center',flex:1, height: '90%', width: '100%' }}>
+                            <Text style = {{fontSize: 25}}>Add Your Device</Text>
+                            <Text style = {{color: 'gray'}}>Please enter DeviceID exactly as shown on the smart mirror.{"\n"}</Text>
+                            <AddDevice handleDeviceID={this.handleDeviceID.bind(this)} onChange={this.onDeviceIDChange.bind(this)} />
+                            <Text>{"\n"}</Text>
+                            <Text>--- OR ---</Text>
+                            <Text>{"\n"}</Text>
+                            <Text style={styles.header}>Sign In With Google</Text>
+                            <Button title="Sign in with Google"  onPress={() => this.signIn()} />
+                        </View>
+                    </View>   
                 )
              } else {
                 return (
